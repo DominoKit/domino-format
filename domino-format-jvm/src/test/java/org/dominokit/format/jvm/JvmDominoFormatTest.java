@@ -26,8 +26,8 @@ class JvmDominoFormatTest {
 
     assertEquals(
         "User Ahmad bought 003 items for 1,250.75 on 2026-04-24",
-        JvmDominoFormat.tokens(
-            "User $S bought $N(000) items for $D(#,##0.00) on $T(yyyy-MM-dd)",
+        JvmDominoFormat.format(
+            "User {0} bought $N(000) items for $D(#,##0.00) on $T(yyyy-MM-dd)",
             "Ahmad",
             3,
             1250.75,
@@ -38,6 +38,6 @@ class JvmDominoFormatTest {
   void shouldInstallJvmSupportForSharedStaticApi() {
     JvmDominoFormat.installAsDefault();
 
-    assertEquals("Price: 1,234.50", DominoFormat.tokens("Price: $D(#,##0.00)", 1234.5));
+    assertEquals("Price: 1,234.50", DominoFormat.format("Price: $D(#,##0.00)", 1234.5));
   }
 }

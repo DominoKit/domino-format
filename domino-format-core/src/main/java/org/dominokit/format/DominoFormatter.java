@@ -1,22 +1,18 @@
 package org.dominokit.format;
 
 import java.util.Objects;
-import org.dominokit.format.internal.IndexedStyleFormatter;
-import org.dominokit.format.internal.PercentStyleFormatter;
-import org.dominokit.format.internal.TokenStyleFormatter;
+import org.dominokit.format.internal.MixedStyleFormatter;
 
 /**
  * Instance-based entry point for Domino Format.
  *
  * <p>A formatter instance owns the {@link FormattingSupport} used to resolve patterned number and
- * date tokens while reusing the same shared parser implementations for indexed, percent, and
- * dollar-token templates.
+ * date tokens while parsing mixed indexed, percent, and dollar-token placeholders through a single
+ * formatting pipeline.
  */
 public final class DominoFormatter {
 
-  private static final IndexedStyleFormatter INDEXED_STYLE_FORMATTER = new IndexedStyleFormatter();
-  private static final PercentStyleFormatter PERCENT_STYLE_FORMATTER = new PercentStyleFormatter();
-  private static final TokenStyleFormatter TOKEN_STYLE_FORMATTER = new TokenStyleFormatter();
+  private static final MixedStyleFormatter MIXED_STYLE_FORMATTER = new MixedStyleFormatter();
 
   private final FormattingSupport formattingSupport;
 
@@ -40,35 +36,14 @@ public final class DominoFormatter {
   }
 
   /**
-   * Formats an indexed template such as {@code "Hello {0}"}.
+   * Formats a template that may mix indexed placeholders such as {@code {0}}, percent
+   * placeholders such as {@code %d}, and dollar-token placeholders such as {@code $N(000)}.
    *
    * @param template the template to render
-   * @param arguments the indexed arguments consumed by the template
+   * @param arguments the arguments consumed by the template
    * @return the formatted string
    */
-  public String indexed(String template, Object... arguments) {
-    return INDEXED_STYLE_FORMATTER.format(template, arguments);
-  }
-
-  /**
-   * Formats a percent-style template using the supported token subset.
-   *
-   * @param template the template to render
-   * @param arguments the sequential arguments consumed by percent placeholders
-   * @return the formatted string
-   */
-  public String percent(String template, Object... arguments) {
-    return PERCENT_STYLE_FORMATTER.format(template, arguments);
-  }
-
-  /**
-   * Formats a dollar-token template such as {@code "Qty: $N(000)"}.
-   *
-   * @param template the template to render
-   * @param arguments the sequential arguments consumed by token placeholders
-   * @return the formatted string
-   */
-  public String tokens(String template, Object... arguments) {
-    return TOKEN_STYLE_FORMATTER.format(template, formattingSupport, arguments);
+  public String format(String template, Object... arguments) {
+    return MIXED_STYLE_FORMATTER.format(template, formattingSupport, arguments);
   }
 }

@@ -5,9 +5,10 @@ import java.util.Objects;
 /**
  * Static convenience API for Domino Format.
  *
- * <p>This class exposes the concise entry points described in the library design while still
- * allowing applications to install platform-specific formatting support when they need numeric or
- * date patterns.
+ * <p>This class exposes a single {@link #format(String, Object...)} entry point that can resolve
+ * indexed placeholders such as {@code {0}}, percent placeholders such as {@code %d}, and
+ * dollar-token placeholders such as {@code $N(000)} in the same template. Applications can still
+ * install platform-specific formatting support when they need numeric or date patterns.
  */
 public final class DominoFormat {
 
@@ -18,7 +19,7 @@ public final class DominoFormat {
   /**
    * Installs the default formatting support used by the static formatting methods.
    *
-   * @param formattingSupport the delegates used by {@link #tokens(String, Object...)}
+   * @param formattingSupport the delegates used by {@link #format(String, Object...)}
    */
   public static void setDefaultFormattingSupport(FormattingSupport formattingSupport) {
     defaultFormattingSupport = Objects.requireNonNull(formattingSupport, "formattingSupport");
@@ -54,35 +55,13 @@ public final class DominoFormat {
   }
 
   /**
-   * Formats an indexed template using the shared static API.
+   * Formats a template that may freely mix indexed, percent, and dollar-token placeholders.
    *
    * @param template the template to render
-   * @param arguments the indexed arguments consumed by the template
+   * @param arguments the arguments consumed by the template
    * @return the formatted string
    */
-  public static String indexed(String template, Object... arguments) {
-    return new DominoFormatter().indexed(template, arguments);
-  }
-
-  /**
-   * Formats a percent-style template using the shared static API.
-   *
-   * @param template the template to render
-   * @param arguments the sequential arguments consumed by percent placeholders
-   * @return the formatted string
-   */
-  public static String percent(String template, Object... arguments) {
-    return new DominoFormatter().percent(template, arguments);
-  }
-
-  /**
-   * Formats a dollar-token template using the currently installed default support.
-   *
-   * @param template the template to render
-   * @param arguments the sequential arguments consumed by token placeholders
-   * @return the formatted string
-   */
-  public static String tokens(String template, Object... arguments) {
-    return new DominoFormatter(defaultFormattingSupport).tokens(template, arguments);
+  public static String format(String template, Object... arguments) {
+    return new DominoFormatter(defaultFormattingSupport).format(template, arguments);
   }
 }

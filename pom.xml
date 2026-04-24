@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.dominokit.format</groupId>
-  <artifactId>domino-format-parent</artifactId>
+  <artifactId>domino-format</artifactId>
   <version>HEAD-SNAPSHOT</version>
   <packaging>pom</packaging>
 

@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 /**
  * Verifies the shared, platform-neutral Domino Format behavior.
  *
- * <p>The tests focus on parsing rules, strict validation, and the delegation points used by the
- * token formatter.
+ * <p>The tests focus on mixed placeholder parsing, strict validation, and the delegation points
+ * used by patterned number and date formatting.
  */
 class DominoFormatTest {
 
@@ -24,14 +24,33 @@ class DominoFormatTest {
   void shouldFormatIndexedTemplates() {
     assertEquals(
         "Hello Ahmad, you have 3 items",
-        DominoFormat.indexed("Hello {0}, you have {1} items", "Ahmad", 3));
+        DominoFormat.format("Hello {0}, you have {1} items", "Ahmad", 3));
   }
 
   @Test
   void shouldFormatPercentTemplates() {
     assertEquals(
         "Hello Ahmad, count=3, done=true%n%".replace("%n", "\n"),
-        DominoFormat.percent("Hello %s, count=%d, done=%b%n%%", "Ahmad", 3, true));
+        DominoFormat.format("Hello %s, count=%d, done=%b%n%%", "Ahmad", 3, true));
+  }
+
+  @Test
+  void shouldFormatMixedTemplatesWithIndexedPercentAndTokenPlaceholders() {
+    DominoFormat.setDefaultFormattingSupport(
+        FormattingSupport.create(
+            (pattern, value) -> "number[" + pattern + "]=" + value,
+            (pattern, value) -> "date[" + pattern + "]=" + value.getTime()));
+
+    assertEquals(
+        "User Ahmad bought 3 items for number[0.00]=12.5",
+        DominoFormat.format("User {0} bought %d items for $D(0.00)", "Ahmad", 3, 12.5));
+  }
+
+  @Test
+  void shouldSkipArgumentsReservedByIndexedPlaceholdersDuringSequentialConsumption() {
+    assertEquals(
+        "alpha beta gamma delta",
+        DominoFormat.format("{0} $S {2} %s", "alpha", "beta", "gamma", "delta"));
   }
 
   @Test
@@ -44,13 +63,13 @@ class DominoFormatTest {
 
     assertEquals(
         "Item: Chocolate, qty: number[000]=7, created: date[yyyy-MM-dd]=0",
-        DominoFormat.tokens("Item: $S, qty: $N(000), created: $T(yyyy-MM-dd)", "Chocolate", 7, date));
+        DominoFormat.format("Item: $S, qty: $N(000), created: $T(yyyy-MM-dd)", "Chocolate", 7, date));
   }
 
   @Test
   void shouldFailWhenPatternedNumberSupportIsMissing() {
     FormatException exception =
-        assertThrows(FormatException.class, () -> DominoFormat.tokens("Qty: $N(000)", 7));
+        assertThrows(FormatException.class, () -> DominoFormat.format("Qty: $N(000)", 7));
 
     assertEquals("No number formatter configured for pattern '000'", exception.getMessage());
   }
@@ -58,7 +77,7 @@ class DominoFormatTest {
   @Test
   void shouldFailWhenTokenTypeDoesNotMatchArgument() {
     FormatException exception =
-        assertThrows(FormatException.class, () -> DominoFormat.tokens("Value: $B", "true"));
+        assertThrows(FormatException.class, () -> DominoFormat.format("Value: $B", "true"));
 
     assertEquals(
         "Type mismatch for token $B: expected java.lang.Boolean but got java.lang.String",
@@ -68,7 +87,7 @@ class DominoFormatTest {
   @Test
   void shouldFailWhenTokenArgumentIsMissing() {
     FormatException exception =
-        assertThrows(FormatException.class, () -> DominoFormat.tokens("Value: $S"));
+        assertThrows(FormatException.class, () -> DominoFormat.format("Value: $S"));
 
     assertEquals("Missing argument for token $S", exception.getMessage());
   }
@@ -76,7 +95,7 @@ class DominoFormatTest {
   @Test
   void shouldFailOnMalformedIndexedTemplate() {
     FormatException exception =
-        assertThrows(FormatException.class, () -> DominoFormat.indexed("Hello {name}", "Ahmad"));
+        assertThrows(FormatException.class, () -> DominoFormat.format("Hello {name}", "Ahmad"));
 
     assertEquals("Invalid indexed placeholder {name}", exception.getMessage());
   }
@@ -84,7 +103,7 @@ class DominoFormatTest {
   @Test
   void shouldFailOnUnsupportedPercentToken() {
     FormatException exception =
-        assertThrows(FormatException.class, () -> DominoFormat.percent("Value=%x", 10));
+        assertThrows(FormatException.class, () -> DominoFormat.format("Value=%x", 10));
 
     assertEquals("Unsupported percent token %x", exception.getMessage());
   }

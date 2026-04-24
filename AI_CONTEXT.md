@@ -31,7 +31,7 @@ The library avoids reliance on `java.util.Formatter` and other non-GWT-compatibl
 ### 1. Indexed Style
 
 ```java
-DominoFormat.indexed("Hello {0}, you have {1} items", name, count);
+DominoFormat.format("Hello {0}, you have {1} items", name, count);
 ```
 
 **Syntax:**
@@ -45,7 +45,7 @@ DominoFormat.indexed("Hello {0}, you have {1} items", name, count);
 ### 2. Percent Style (Subset)
 
 ```java
-DominoFormat.percent("Hello %s, count=%d", name, count);
+DominoFormat.format("Hello %s, count=%d", name, count);
 ```
 
 **Supported tokens:**
@@ -64,7 +64,7 @@ DominoFormat.percent("Hello %s, count=%d", name, count);
 ### 3. Dollar Token Style (Primary Innovation)
 
 ```java
-DominoFormat.tokens(
+DominoFormat.format(
     "Item: $S, qty: $N(000), price: $D(#,##0.00)",
     "Chocolate",
     7,
@@ -110,15 +110,31 @@ $T(yyyy-MM-dd)
 ### Examples
 
 ```java
-DominoFormat.tokens("Qty: $N(000)", 5);
+DominoFormat.format("Qty: $N(000)", 5);
 // Qty: 005
 
-DominoFormat.tokens("Price: $D(0.00)", 12.5);
+DominoFormat.format("Price: $D(0.00)", 12.5);
 // Price: 12.50
 
-DominoFormat.tokens("Date: $T(yyyy-MM-dd)", date);
+DominoFormat.format("Date: $T(yyyy-MM-dd)", date);
 // Date: 2026-04-24
 ```
+
+---
+
+## Mixed Templates
+
+All three styles can appear in the same template:
+
+```java
+DominoFormat.format("Hello {0}, count=%d, price=$D(0.00)", name, count, price);
+```
+
+Argument handling rules:
+
+* Indexed placeholders reserve explicit argument slots.
+* Percent and dollar-token placeholders consume arguments sequentially from left to right.
+* Sequential placeholders skip any argument slot already reserved by an indexed placeholder.
 
 ---
 
@@ -128,8 +144,11 @@ DominoFormat.tokens("Date: $T(yyyy-MM-dd)", date);
 template       := part*
 part           := text | placeholder
 
-placeholder    := '$' token pattern?
-token          := 'S' | 'L' | 'N' | 'D' | 'B' | 'T' | '$'
+placeholder    := indexed | percent | token
+indexed        := '{' digits '}'
+percent        := '%' ('s' | 'd' | 'f' | 'b' | '%' | 'n')
+token          := '$' tokenType pattern?
+tokenType      := 'S' | 'L' | 'N' | 'D' | 'B' | 'T' | '$'
 pattern        := '(' patternText ')'
 ```
 
@@ -137,18 +156,12 @@ pattern        := '(' patternText ')'
 
 ## Internal Model
 
-### Token Representation
+### Placeholder Resolution
 
 ```java
-interface Token {}
-
-class TextToken implements Token {
-    String text;
-}
-
-class ArgToken implements Token {
-    char type;
-    String pattern; // nullable
+class ArgumentResolver {
+    Object resolveIndexed(int index);
+    Object resolveSequential(String tokenLabel);
 }
 ```
 
@@ -158,20 +171,13 @@ class ArgToken implements Token {
 
 ```text
 domino-format
-├── core
-│   ├── parser
-│   ├── tokens
-│   ├── formatter engine
-│   └── interfaces
-│
-├── style-indexed
-├── style-percent
-├── style-tokens
-│
-├── platform-jvm
+├── domino-format-core
+│   ├── mixed formatter engine
+│   ├── argument resolver
+│   └── formatting support interfaces
+├── domino-format-jvm
 │   └── java.text adapters
-│
-└── platform-gwt
+└── domino-format-gwt
     └── GWT i18n adapters
 ```
 
@@ -215,23 +221,24 @@ new SimpleDateFormat(pattern).format(date);
 
 * Single-pass parser
 * No heavy regex dependency
-* Produces token list
-* Tokens reused for formatting (optional caching)
+* Resolves placeholders during the scan
+* Can support template caching later if needed
 
 ---
 
 ## Formatting Flow
 
 ```text
-template → parse → tokens → iterate → resolve args → build String
+template → scan → resolve args → format values → build String
 ```
 
 ---
 
 ## Argument Handling
 
-* Sequential argument consumption
-* Future extension: indexed arguments for tokens
+* Indexed placeholders reserve explicit argument slots
+* Sequential percent and dollar-token placeholders consume arguments from left to right
+* Sequential placeholders skip slots already reserved by indexed placeholders
 * Strict validation:
 
     * Missing args → exception
@@ -287,9 +294,7 @@ Unexpected end of template
 Recommended API:
 
 ```java
-DominoFormat.indexed(...)
-DominoFormat.percent(...)
-DominoFormat.tokens(...)
+DominoFormat.format(...)
 ```
 
 Alternative:
@@ -334,8 +339,8 @@ The **$-token formatting system**:
 ## Example Summary
 
 ```java
-DominoFormat.tokens(
-    "User $S bought $N(000) items for $D(#,##0.00)",
+DominoFormat.format(
+    "User {0} bought %d items for $D(#,##0.00)",
     "Ahmad",
     3,
     1250.75

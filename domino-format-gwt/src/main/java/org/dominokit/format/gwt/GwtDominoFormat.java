@@ -33,35 +33,13 @@ public final class GwtDominoFormat {
   }
 
   /**
-   * Formats an indexed template using GWT-backed support.
+   * Formats a template that may mix indexed, percent, and dollar-token placeholders.
    *
    * @param template the template to render
-   * @param arguments the indexed arguments consumed by the template
+   * @param arguments the arguments consumed by the template
    * @return the formatted string
    */
-  public static String indexed(String template, Object... arguments) {
-    return FORMATTER.indexed(template, arguments);
-  }
-
-  /**
-   * Formats a percent template using GWT-backed support.
-   *
-   * @param template the template to render
-   * @param arguments the sequential arguments consumed by the template
-   * @return the formatted string
-   */
-  public static String percent(String template, Object... arguments) {
-    return FORMATTER.percent(template, arguments);
-  }
-
-  /**
-   * Formats a token template using GWT-native numeric and date delegates.
-   *
-   * @param template the template to render
-   * @param arguments the sequential arguments consumed by the template
-   * @return the formatted string
-   */
-  public static String tokens(String template, Object... arguments) {
-    return FORMATTER.tokens(template, arguments);
+  public static String format(String template, Object... arguments) {
+    return FORMATTER.format(template, arguments);
   }
 }
