@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.dominokit.format</groupId>
+  <artifactId>domino-format-parent</artifactId>
+  <version>HEAD-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Domino Format Parent</name>
+  <description>Standalone multi-style formatting library for DominoKit.</description>
+  <url>https://github.com/DominoKit/domino-format</url>
+
+  <modules>
+    <module>domino-format-core</module>
+    <module>domino-format-jvm</module>
+    <module>domino-format-gwt</module>
+  </modules>
+
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.plugin>3.12.1</maven.compiler.plugin>
+    <maven.surefire.plugin>3.2.5</maven.surefire.plugin>
+    <maven.gwt.plugin>1.1.0</maven.gwt.plugin>
+    <gwtproject.version>1.0.0-RC1</gwtproject.version>
+    <gwt.i18n.version>1.0.2</gwt.i18n.version>
+    <junit.jupiter.version>5.10.2</junit.jupiter.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.gwtproject.core</groupId>
+        <artifactId>gwt-core</artifactId>
+        <version>${gwtproject.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dominokit.i18n</groupId>
+        <artifactId>gwt-numberformat</artifactId>
+        <version>${gwt.i18n.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dominokit.i18n</groupId>
+        <artifactId>gwt-datetimeformat</artifactId>
+        <version>${gwt.i18n.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${junit.jupiter.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>net.ltgt.gwt.maven</groupId>
+          <artifactId>gwt-maven-plugin</artifactId>
+          <version>${maven.gwt.plugin}</version>
+          <extensions>true</extensions>
+          <configuration>
+            <sourceLevel>${maven.compiler.source}</sourceLevel>
+            <failOnError>true</failOnError>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin}</version>
+        <configuration>
+          <release>11</release>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven.surefire.plugin}</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
