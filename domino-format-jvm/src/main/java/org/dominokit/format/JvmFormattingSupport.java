@@ -1,8 +1,7 @@
-package org.dominokit.format.jvm;
+package org.dominokit.format;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import org.dominokit.format.FormattingSupport;
 
 /**
  * Provides JVM-native patterned number and date formatting support for Domino Format.

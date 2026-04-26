@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Date;
 import org.dominokit.format.DominoFormat;
+import org.dominokit.format.FormattingSupport;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ class JvmDominoFormatTest {
 
     assertEquals(
         "User Ahmad bought 003 items for 1,250.75 on 2026-04-24",
-        JvmDominoFormat.format(
+        DominoFormat.format(
             "User {0} bought $N(000) items for $D(#,##0.00) on $T(yyyy-MM-dd)",
             "Ahmad",
             3,
@@ -35,9 +36,17 @@ class JvmDominoFormatTest {
   }
 
   @Test
-  void shouldInstallJvmSupportForSharedStaticApi() {
-    JvmDominoFormat.installAsDefault();
-
+  void shouldExposeJvmPatternSupportThroughTheSharedStaticApiByDefault() {
     assertEquals("Price: 1,234.50", DominoFormat.format("Price: $D(#,##0.00)", 1234.5));
+  }
+
+  @Test
+  void shouldReplaceSharedStaticFormatterWhenCustomSupportIsInstalled() {
+    DominoFormat.setFormattingSupport(
+        FormattingSupport.create(
+            (pattern, value) -> "number[" + pattern + "]=" + value,
+            (pattern, value) -> "date[" + pattern + "]=" + value.getTime()));
+
+    assertEquals("Price: number[0.00]=12.5", DominoFormat.format("Price: $D(0.00)", 12.5));
   }
 }

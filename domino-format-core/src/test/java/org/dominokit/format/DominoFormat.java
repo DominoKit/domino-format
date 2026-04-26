@@ -3,12 +3,11 @@ package org.dominokit.format;
 import java.util.Objects;
 
 /**
- * Static convenience API for Domino Format.
+ * Test-only static facade used by the core module tests.
  *
- * <p>This class exposes a single {@link #format(String, Object...)} entry point that can resolve
- * indexed placeholders such as {@code {0}}, percent placeholders such as {@code %d}, and
- * dollar-token placeholders such as {@code $N(000)} in the same template. Applications can still
- * install platform-specific formatting support when they need numeric or date patterns.
+ * <p>The production static {@code DominoFormat} facade now lives in the runtime modules, but the
+ * core parser tests still need a small static entry point so they can verify shared formatting
+ * semantics without choosing a concrete runtime adapter.
  */
 public final class DominoFormat {
 

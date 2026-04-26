@@ -1,6 +1,5 @@
-package org.dominokit.format.gwt;
+package org.dominokit.format;
 
-import org.dominokit.format.FormattingSupport;
 import org.gwtproject.i18n.client.NumberFormat;
 import org.gwtproject.i18n.shared.DateTimeFormat;
 

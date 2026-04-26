@@ -35,6 +35,10 @@ public final class DominoFormatter {
     this.formattingSupport = Objects.requireNonNull(formattingSupport, "formattingSupport");
   }
 
+  public FormattingSupport getFormattingSupport() {
+    return formattingSupport;
+  }
+
   /**
    * Formats a template that may mix indexed placeholders such as {@code {0}}, percent
    * placeholders such as {@code %d}, and dollar-token placeholders such as {@code $N(000)}.
