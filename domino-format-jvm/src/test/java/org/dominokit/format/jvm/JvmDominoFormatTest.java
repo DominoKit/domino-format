@@ -60,9 +60,24 @@ class JvmDominoFormatTest {
   }
 
   @Test
+  void shouldFormatNamedArgumentsThroughTheSharedStaticByNameHelper() {
+    assertEquals(
+        "Hello Ahmad",
+        DominoFormat.format("Hello $(userName)", DominoFormat.byName("userName", "Ahmad")));
+  }
+
+  @Test
   void shouldUseTheConfiguredMissingNamedArgumentHandlerThroughTheSharedStaticApi() {
     DominoFormat.setMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
 
     assertEquals("Hello <missing:userName>", DominoFormat.format("Hello $(userName)"));
+  }
+
+  @Test
+  void shouldResetTheSharedStaticMissingNamedArgumentHandlerToDefaultBehavior() {
+    DominoFormat.setMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
+    DominoFormat.resetDefaultMissingNamedArgumentHandler();
+
+    assertEquals("Hello ", DominoFormat.format("Hello $(userName)"));
   }
 }

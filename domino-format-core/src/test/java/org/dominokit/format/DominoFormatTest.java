@@ -57,6 +57,13 @@ class DominoFormatTest {
   }
 
   @Test
+  void shouldTrimNamedPlaceholderExpressionsAndNamedArgumentNames() {
+    assertEquals(
+        "Hello Ahmad",
+        DominoFormat.format("Hello $( userName )", DominoFormat.byName(" userName ", "Ahmad")));
+  }
+
+  @Test
   void shouldFormatMixedTemplatesWithIndexedPercentAndTokenPlaceholders() {
     DominoFormat.setDefaultFormattingSupport(
         FormattingSupport.create(
@@ -87,6 +94,13 @@ class DominoFormatTest {
   }
 
   @Test
+  void shouldExcludeNamedArgumentMapsFromPositionalResolution() {
+    assertEquals(
+        "one zero Ahmad",
+        DominoFormat.format("{1} %s $(userName)", Map.of("userName", "Ahmad"), "zero", "one"));
+  }
+
+  @Test
   void shouldFormatTokenTemplatesWithInstalledSupport() {
     Date date = new Date(0L);
     DominoFormat.setDefaultFormattingSupport(
@@ -109,6 +123,34 @@ class DominoFormatTest {
     DominoFormat.setDefaultMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
 
     assertEquals("Hello <missing:userName>", DominoFormat.format("Hello $(userName)"));
+  }
+
+  @Test
+  void shouldResetMissingNamedArgumentHandlerToDefaultEmptyBehavior() {
+    DominoFormat.setDefaultMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
+    DominoFormat.resetDefaultMissingNamedArgumentHandler();
+
+    assertEquals("Hello ", DominoFormat.format("Hello $(userName)"));
+  }
+
+  @Test
+  void shouldPreferLaterNamedArgumentsWhenDuplicateNamesAreSupplied() {
+    assertEquals(
+        "Hello Dana",
+        DominoFormat.format(
+            "Hello $(userName)",
+            DominoFormat.byName("userName", "Ahmad"),
+            DominoFormat.byName("userName", "Dana")));
+  }
+
+  @Test
+  void shouldAllowMapAndExplicitNamedArgumentsToBeCombined() {
+    assertEquals(
+        "Hello Dana",
+        DominoFormat.format(
+            "Hello $(userName)",
+            Map.of("userName", "Ahmad"),
+            DominoFormat.byName("userName", "Dana")));
   }
 
   @Test
@@ -159,5 +201,21 @@ class DominoFormatTest {
         assertThrows(FormatException.class, () -> DominoFormat.format("Hello $()"));
 
     assertEquals("Empty named placeholder is not allowed", exception.getMessage());
+  }
+
+  @Test
+  void shouldFailWhenNamedArgumentMapContainsBlankKeys() {
+    FormatException exception =
+        assertThrows(FormatException.class, () -> DominoFormat.format("Hello $(userName)", Map.of(" ", "Ahmad")));
+
+    assertEquals("Named argument map keys must not be blank", exception.getMessage());
+  }
+
+  @Test
+  void shouldFailWhenNamedArgumentNameIsBlank() {
+    IllegalArgumentException exception =
+        assertThrows(IllegalArgumentException.class, () -> DominoFormat.byName(" ", "Ahmad"));
+
+    assertEquals("Named argument name must not be blank", exception.getMessage());
   }
 }
