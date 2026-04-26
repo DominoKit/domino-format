@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Domino Format** is a lightweight, cross-platform (JVM + GWT/J2CL) string formatting library designed to support multiple formatting styles in a unified, extensible way.
+**Domino Format** is a lightweight, cross-platform (JVM + GWT) string formatting library designed to support multiple formatting styles in a unified, extensible way.
 
 The library avoids reliance on `java.util.Formatter` and other non-GWT-compatible APIs, while still providing powerful formatting capabilities for:
 
@@ -15,7 +15,7 @@ The library avoids reliance on `java.util.Formatter` and other non-GWT-compatibl
 
 ## Design Goals
 
-* ✅ GWT / J2CL compatible
+* ✅ GWT compatible
 * ✅ No dependency on `java.util.Formatter`
 * ✅ No OpenJDK code reuse (clean-room implementation)
 * ✅ Multiple formatting styles supported
@@ -42,7 +42,35 @@ DominoFormat.format("Hello {0}, you have {1} items", name, count);
 
 ---
 
-### 2. Percent Style (Subset)
+### 2. Named Style
+
+```java
+DominoFormat.format(
+    "Hello $(userName), you have %d items",
+    DominoFormat.byName("userName", "Ahmad"),
+    3);
+```
+
+**Syntax:**
+
+```text
+$(name)
+$(first name)
+```
+
+**Named argument sources:**
+
+* `DominoFormat.byName(name, value)`
+* `Map<String, ?>`
+
+**Missing-name behavior:**
+
+* Default: replace with `""`
+* Customizable through `MissingNamedArgumentHandler`
+
+---
+
+### 3. Percent Style (Subset)
 
 ```java
 DominoFormat.format("Hello %s, count=%d", name, count);
@@ -61,7 +89,7 @@ DominoFormat.format("Hello %s, count=%d", name, count);
 
 ---
 
-### 3. Dollar Token Style (Primary Innovation)
+### 4. Dollar Token Style (Primary Innovation)
 
 ```java
 DominoFormat.format(
@@ -124,15 +152,22 @@ DominoFormat.format("Date: $T(yyyy-MM-dd)", date);
 
 ## Mixed Templates
 
-All three styles can appear in the same template:
+All four styles can appear in the same template:
 
 ```java
-DominoFormat.format("Hello {0}, count=%d, price=$D(0.00)", name, count, price);
+DominoFormat.format(
+    "Hello {0}, $(userName), count=%d, price=$D(0.00)",
+    DominoFormat.byName("userName", name),
+    name,
+    count,
+    price);
 ```
 
 Argument handling rules:
 
+* Named argument sources are removed from the positional argument stream.
 * Indexed placeholders reserve explicit argument slots.
+* Named placeholders resolve by expression and do not consume positional arguments.
 * Percent and dollar-token placeholders consume arguments sequentially from left to right.
 * Sequential placeholders skip any argument slot already reserved by an indexed placeholder.
 
@@ -144,8 +179,9 @@ Argument handling rules:
 template       := part*
 part           := text | placeholder
 
-placeholder    := indexed | percent | token
+placeholder    := indexed | named | percent | token
 indexed        := '{' digits '}'
+named          := '$(' namedText ')'
 percent        := '%' ('s' | 'd' | 'f' | 'b' | '%' | 'n')
 token          := '$' tokenType pattern?
 tokenType      := 'S' | 'L' | 'N' | 'D' | 'B' | 'T' | '$'
@@ -162,6 +198,7 @@ pattern        := '(' patternText ')'
 class ArgumentResolver {
     Object resolveIndexed(int index);
     Object resolveSequential(String tokenLabel);
+    String resolveNamed(String expression);
 }
 ```
 
@@ -237,13 +274,16 @@ template → scan → resolve args → format values → build String
 ## Argument Handling
 
 * Indexed placeholders reserve explicit argument slots
+* Named placeholders resolve independently from positional consumption
 * Sequential percent and dollar-token placeholders consume arguments from left to right
+* Named argument sources are removed before indexed or sequential consumption begins
 * Sequential placeholders skip slots already reserved by indexed placeholders
 * Strict validation:
 
     * Missing args → exception
     * Invalid pattern → exception
     * Type mismatch → exception
+    * Missing named args → handler fallback
 
 ---
 
@@ -275,12 +315,6 @@ Unexpected end of template
 ---
 
 ## Future Extensions
-
-* Named arguments:
-
-```java
-"Hello $S{name}"
-```
 
 * Conditional formatting
 * Pluralization support
@@ -340,7 +374,8 @@ The **$-token formatting system**:
 
 ```java
 DominoFormat.format(
-    "User {0} bought %d items for $D(#,##0.00)",
+    "User {0} / $(userName) bought %d items for $D(#,##0.00)",
+    DominoFormat.byName("userName", "Ahmad"),
     "Ahmad",
     3,
     1250.75

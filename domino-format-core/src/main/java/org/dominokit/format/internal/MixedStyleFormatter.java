@@ -4,14 +4,15 @@ import java.util.Date;
 import java.util.Objects;
 import org.dominokit.format.FormatException;
 import org.dominokit.format.FormattingSupport;
+import org.dominokit.format.MissingNamedArgumentHandler;
 
 /**
- * Formats templates that may mix indexed, percent, and dollar-token placeholder styles.
+ * Formats templates that may mix indexed, named, percent, and dollar-token placeholder styles.
  *
  * <p>The formatter scans the template once, resolves indexed placeholders through explicit
- * argument positions, and resolves percent and dollar-token placeholders through a shared
- * left-to-right sequential cursor that skips any argument slot already claimed by an indexed
- * placeholder.
+ * argument positions, resolves named placeholders through a dedicated expression lookup, and
+ * resolves percent and dollar-token placeholders through a shared left-to-right sequential cursor
+ * that skips any positional argument slot already claimed by an indexed placeholder.
  */
 public final class MixedStyleFormatter {
 
@@ -20,13 +21,20 @@ public final class MixedStyleFormatter {
    *
    * @param template the template to render
    * @param formattingSupport the platform delegates used for patterned number and date values
+   * @param missingNamedArgumentHandler the handler used when a named placeholder is unresolved
    * @param arguments the arguments consumed by the template
    * @return the formatted string
    */
-  public String format(String template, FormattingSupport formattingSupport, Object... arguments) {
+  public String format(
+      String template,
+      FormattingSupport formattingSupport,
+      MissingNamedArgumentHandler missingNamedArgumentHandler,
+      Object... arguments) {
     Objects.requireNonNull(template, "template");
     Objects.requireNonNull(formattingSupport, "formattingSupport");
-    ArgumentResolver argumentResolver = new ArgumentResolver(arguments);
+    Objects.requireNonNull(missingNamedArgumentHandler, "missingNamedArgumentHandler");
+    ArgumentResolver argumentResolver =
+        new ArgumentResolver(arguments, missingNamedArgumentHandler);
     StringBuilder output = new StringBuilder(template.length());
 
     for (int index = 0; index < template.length(); index++) {
@@ -120,6 +128,9 @@ public final class MixedStyleFormatter {
       output.append('$');
       return startIndex + 1;
     }
+    if (marker == '(') {
+      return appendNamedPlaceholder(template, startIndex, output, argumentResolver);
+    }
 
     TokenType tokenType;
     try {
@@ -151,6 +162,24 @@ public final class MixedStyleFormatter {
             argumentResolver.resolveSequential("$" + marker),
             formattingSupport));
     return endIndex;
+  }
+
+  private int appendNamedPlaceholder(
+      String template, int startIndex, StringBuilder output, ArgumentResolver argumentResolver) {
+    int expressionStartIndex = startIndex + 2;
+    int expressionEndIndex = template.indexOf(')', expressionStartIndex);
+    if (expressionEndIndex < 0) {
+      throw new FormatException(
+          "Unexpected end of format template while parsing named placeholder");
+    }
+
+    String expression = template.substring(expressionStartIndex, expressionEndIndex).trim();
+    if (expression.isEmpty()) {
+      throw new FormatException("Empty named placeholder is not allowed");
+    }
+
+    output.append(argumentResolver.resolveNamed(expression));
+    return expressionEndIndex;
   }
 
   private String formatDollarToken(

@@ -3,6 +3,7 @@ package org.dominokit.format.jvm;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Date;
+import java.util.Map;
 import org.dominokit.format.DominoFormat;
 import org.dominokit.format.FormattingSupport;
 import org.junit.jupiter.api.AfterEach;
@@ -19,6 +20,7 @@ class JvmDominoFormatTest {
   @AfterEach
   void resetDefaultSupport() {
     DominoFormat.resetDefaultFormattingSupport();
+    DominoFormat.resetDefaultMissingNamedArgumentHandler();
   }
 
   @Test
@@ -48,5 +50,19 @@ class JvmDominoFormatTest {
             (pattern, value) -> "date[" + pattern + "]=" + value.getTime()));
 
     assertEquals("Price: number[0.00]=12.5", DominoFormat.format("Price: $D(0.00)", 12.5));
+  }
+
+  @Test
+  void shouldFormatNamedArgumentsThroughTheSharedStaticApi() {
+    assertEquals(
+        "Hello Ahmad",
+        DominoFormat.format("Hello $(userName)", Map.of("userName", "Ahmad")));
+  }
+
+  @Test
+  void shouldUseTheConfiguredMissingNamedArgumentHandlerThroughTheSharedStaticApi() {
+    DominoFormat.setMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
+
+    assertEquals("Hello <missing:userName>", DominoFormat.format("Hello $(userName)"));
   }
 }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Date;
+import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,7 @@ class DominoFormatTest {
   @AfterEach
   void resetDefaultSupport() {
     DominoFormat.resetDefaultFormattingSupport();
+    DominoFormat.resetDefaultMissingNamedArgumentHandler();
   }
 
   @Test
@@ -32,6 +34,26 @@ class DominoFormatTest {
     assertEquals(
         "Hello Ahmad, count=3, done=true" + System.lineSeparator() + "%",
         DominoFormat.format("Hello %s, count=%d, done=%b%n%%", "Ahmad", 3, true));
+  }
+
+  @Test
+  void shouldFormatNamedTemplatesUsingExplicitNamedArguments() {
+    assertEquals(
+        "Hello Ahmad, you have 3 items",
+        DominoFormat.format(
+            "Hello $(userName), you have %d items",
+            DominoFormat.byName("userName", "Ahmad"),
+            3));
+  }
+
+  @Test
+  void shouldFormatNamedTemplatesUsingNamedArgumentMaps() {
+    assertEquals(
+        "Hello Ahmad, you have 3 items",
+        DominoFormat.format(
+            "Hello $(userName), you have %d items",
+            Map.of("userName", "Ahmad"),
+            3));
   }
 
   @Test
@@ -54,6 +76,17 @@ class DominoFormatTest {
   }
 
   @Test
+  void shouldExcludeNamedArgumentSourcesFromPositionalResolution() {
+    assertEquals(
+        "one zero Ahmad",
+        DominoFormat.format(
+            "{1} %s $(userName)",
+            DominoFormat.byName("userName", "Ahmad"),
+            "zero",
+            "one"));
+  }
+
+  @Test
   void shouldFormatTokenTemplatesWithInstalledSupport() {
     Date date = new Date(0L);
     DominoFormat.setDefaultFormattingSupport(
@@ -64,6 +97,18 @@ class DominoFormatTest {
     assertEquals(
         "Item: Chocolate, qty: number[000]=7, created: date[yyyy-MM-dd]=0",
         DominoFormat.format("Item: $S, qty: $N(000), created: $T(yyyy-MM-dd)", "Chocolate", 7, date));
+  }
+
+  @Test
+  void shouldReplaceMissingNamedArgumentsWithEmptyStringByDefault() {
+    assertEquals("Hello ", DominoFormat.format("Hello $(missingUser)"));
+  }
+
+  @Test
+  void shouldUseCustomMissingNamedArgumentHandler() {
+    DominoFormat.setDefaultMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
+
+    assertEquals("Hello <missing:userName>", DominoFormat.format("Hello $(userName)"));
   }
 
   @Test
@@ -106,5 +151,13 @@ class DominoFormatTest {
         assertThrows(FormatException.class, () -> DominoFormat.format("Value=%x", 10));
 
     assertEquals("Unsupported percent token %x", exception.getMessage());
+  }
+
+  @Test
+  void shouldFailOnEmptyNamedPlaceholder() {
+    FormatException exception =
+        assertThrows(FormatException.class, () -> DominoFormat.format("Hello $()"));
+
+    assertEquals("Empty named placeholder is not allowed", exception.getMessage());
   }
 }

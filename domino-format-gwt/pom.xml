@@ -14,7 +14,7 @@
   <packaging>gwt-lib</packaging>
 
   <name>Domino Format GWT</name>
-  <description>GWT/J2CL platform adapters for Domino Format.</description>
+  <description>GWT platform adapters for Domino Format.</description>
 
   <build>
     <plugins>

@@ -2,9 +2,10 @@
 
 Domino Format is a standalone multi-style string formatting library for DominoKit projects.
 
-It is built around one parser that can mix three placeholder styles in the same template:
+It is built around one parser that can mix four placeholder styles in the same template:
 
 - indexed placeholders such as `{0}`
+- named placeholders such as `$(userName)`
 - percent placeholders such as `%d`
 - dollar tokens such as `$D(#,##0.00)`
 
@@ -16,7 +17,7 @@ The library is split into three modules:
   JVM runtime adapter that exposes `org.dominokit.format.DominoFormat` with `DecimalFormat` and
   `SimpleDateFormat` support preinstalled
 - `domino-format-gwt`
-  GWT/J2CL runtime adapter that exposes the same `org.dominokit.format.DominoFormat` API with
+  GWT runtime adapter that exposes the same `org.dominokit.format.DominoFormat` API with
   `NumberFormat` and `DateTimeFormat` support preinstalled
 
 ## Choose The Right Module
@@ -35,9 +36,9 @@ Use `domino-format-jvm` when:
 
 Use `domino-format-gwt` when:
 
-- your code runs on GWT or J2CL
+- your code runs on GWT
 - you want the same `DominoFormat.format(...)` API as the JVM module
-- you want GWT/J2CL-native `NumberFormat` and `DateTimeFormat` behavior
+- you want GWT-native `NumberFormat` and `DateTimeFormat` behavior
 
 ## Maven Dependencies
 
@@ -61,7 +62,7 @@ Use `domino-format-gwt` when:
 </dependency>
 ```
 
-### GWT / J2CL
+### GWT
 
 ```xml
 <dependency>
@@ -73,7 +74,7 @@ Use `domino-format-gwt` when:
 
 ## Quick Start
 
-### JVM Or GWT/J2CL Runtime Modules
+### JVM Or GWT Runtime Modules
 
 When you depend on `domino-format-jvm` or `domino-format-gwt`, the selected runtime module
 provides the shared `org.dominokit.format.DominoFormat` facade and installs the correct default
@@ -85,11 +86,32 @@ import org.dominokit.format.DominoFormat;
 
 String message =
     DominoFormat.format(
-        "User {0} bought $N(000) items for $D(#,##0.00) on $T(yyyy-MM-dd)",
-        "Ahmad",
+        "User $(userName) bought $N(000) items for $D(#,##0.00) on $T(yyyy-MM-dd)",
+        DominoFormat.byName("userName", "Ahmad"),
         3,
         1250.75,
         new Date());
+```
+
+### Named Arguments Quick Start
+
+Named placeholders use the syntax `$(expression)`. You can satisfy them either with explicit named
+arguments created through `DominoFormat.byName(...)` or with a `Map<String, ?>`.
+
+```java
+String message =
+    DominoFormat.format(
+        "Hello $(userName), you bought %d items",
+        DominoFormat.byName("userName", "Ahmad"),
+        3);
+```
+
+```java
+String message =
+    DominoFormat.format(
+        "Hello $(userName), you bought %d items",
+        Map.of("userName", "Ahmad"),
+        3);
 ```
 
 ### Core-Only Usage
@@ -130,6 +152,21 @@ String message =
         new Date());
 ```
 
+### Core-Only Usage With A Custom Missing Named Argument Handler
+
+If unresolved named placeholders should produce custom fallback text, supply a
+`MissingNamedArgumentHandler`.
+
+```java
+import org.dominokit.format.DominoFormatter;
+
+DominoFormatter formatter =
+    new DominoFormatter()
+        .withMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
+
+String message = formatter.format("Hello $(userName)");
+```
+
 ## Formatting Styles
 
 ### Indexed Placeholders
@@ -138,6 +175,47 @@ Indexed placeholders read arguments by explicit zero-based position.
 
 ```java
 DominoFormat.format("Hello {0}, you have {1} items", "Ahmad", 3);
+```
+
+### Named Placeholders
+
+Named placeholders use the syntax `$(expression)`.
+
+Supported named argument sources:
+
+- `DominoFormat.byName("expression", value)` or `DominoFormatter.byName("expression", value)`
+- `Map<String, ?>` values passed directly to `format(...)`
+
+Examples:
+
+```java
+DominoFormat.format(
+    "Hello $(userName), you have %d items",
+    DominoFormat.byName("userName", "Ahmad"),
+    3);
+```
+
+```java
+DominoFormat.format(
+    "Hello $(userName), you have %d items",
+    Map.of("userName", "Ahmad"),
+    3);
+```
+
+Resolution behavior:
+
+- leading and trailing whitespace inside `$(...)` is ignored
+- internal whitespace is preserved, so `$(first name)` is valid
+- if the same name is provided more than once, the last supplied value wins
+- if a name is missing, the default behavior replaces it with an empty string
+
+You can override the default missing-name behavior:
+
+```java
+DominoFormat.setMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
+
+String message = DominoFormat.format("Hello $(userName)");
+// Hello <missing:userName>
 ```
 
 ### Percent Placeholders
@@ -187,7 +265,8 @@ All placeholder styles can be mixed in one template:
 
 ```java
 DominoFormat.format(
-    "User {0} bought %d items for $D(#,##0.00)",
+    "User {0} / $(userName) bought %d items for $D(#,##0.00)",
+    DominoFormat.byName("userName", "Ahmad"),
     "Ahmad",
     3,
     1250.75);
@@ -197,15 +276,23 @@ DominoFormat.format(
 
 Argument consumption is intentionally strict and predictable:
 
+- named arguments supplied through `byName(...)` or `Map<String, ?>` sources are removed from the
+  positional argument stream
 - indexed placeholders such as `{0}` reserve a specific argument slot
+- named placeholders such as `$(userName)` resolve by expression and do not consume positional
+  arguments
 - percent placeholders and dollar tokens consume arguments sequentially from left to right
 - sequential placeholders skip any slot already reserved by an indexed placeholder
 
 Example:
 
 ```java
-DominoFormat.format("{0} $S {2} %s", "alpha", "beta", "gamma", "delta");
-// alpha beta gamma delta
+DominoFormat.format(
+    "{1} %s $(userName)",
+    DominoFormat.byName("userName", "Ahmad"),
+    "zero",
+    "one");
+// one zero Ahmad
 ```
 
 ## Static API vs Instance API
@@ -250,6 +337,28 @@ DominoFormat.resetDefaultFormattingSupport();
 formatter and returns it. If you need an isolated formatter that does not change global state, use
 `new DominoFormatter(customSupport)` instead.
 
+### Overriding The Missing Named Argument Handler
+
+Runtime modules also install a default missing named argument handler that replaces unresolved
+`$(...)` placeholders with an empty string. You can replace it:
+
+```java
+DominoFormat.setMissingNamedArgumentHandler(expression -> "[" + expression + "]");
+
+String message = DominoFormat.format("Hello $(userName)");
+// Hello [userName]
+```
+
+To restore the default empty-string behavior:
+
+```java
+DominoFormat.resetDefaultMissingNamedArgumentHandler();
+```
+
+`DominoFormat.withMissingNamedArgumentHandler(...)` updates the shared static formatter and returns
+it. If you want per-instance behavior instead, create a dedicated `DominoFormatter` with the
+desired handler.
+
 ## Migrating From The Old Runtime Facades
 
 If you were using the older runtime-specific facade classes, migrate as follows:
@@ -258,7 +367,7 @@ If you were using the older runtime-specific facade classes, migrate as follows:
   from `domino-format-jvm`
 - replace `org.dominokit.format.gwt.GwtDominoFormat` with `org.dominokit.format.DominoFormat`
   from `domino-format-gwt`
-- remove manual runtime-support installation when you only need the default JVM or GWT/J2CL
+- remove manual runtime-support installation when you only need the default JVM or GWT
   behavior, because the runtime modules now install their own default `FormattingSupport`
 
 Before:
@@ -279,11 +388,15 @@ Domino Format fails fast with `FormatException` when it encounters invalid input
 include:
 
 - malformed placeholders such as `{name}` when only numeric indexes are allowed
+- empty named placeholders such as `$()`
 - missing arguments for indexed, percent, or dollar-token placeholders
 - unsupported percent or dollar-token markers
 - type mismatches such as `%b` with a string or `$T` with a non-date value
 - patterned number or date tokens used without a matching formatter
+- invalid named argument map keys
 - invalid numeric or date patterns rejected by the active runtime formatter
+- unresolved named placeholders do not fail by default; they are delegated to the installed
+  `MissingNamedArgumentHandler`
 
 ## Notes
 
