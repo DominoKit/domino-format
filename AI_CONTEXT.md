@@ -57,7 +57,7 @@ DominoFormat.format("Hello %s, count=%d", name, count);
 | `%f`  | Decimal     |
 | `%b`  | Boolean     |
 | `%%`  | Literal `%` |
-| `%n`  | Newline     |
+| `%n`  | System line separator |
 
 ---
 

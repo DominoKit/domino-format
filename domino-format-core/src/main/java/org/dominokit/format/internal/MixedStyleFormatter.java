@@ -86,7 +86,7 @@ public final class MixedStyleFormatter {
         output.append('%');
         return startIndex + 1;
       case 'n':
-        output.append('\n');
+        output.append(System.lineSeparator());
         return startIndex + 1;
       case 's':
         output.append(String.valueOf(argumentResolver.resolveSequential("%s")));

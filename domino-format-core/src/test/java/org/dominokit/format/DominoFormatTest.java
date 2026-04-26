@@ -30,7 +30,7 @@ class DominoFormatTest {
   @Test
   void shouldFormatPercentTemplates() {
     assertEquals(
-        "Hello Ahmad, count=3, done=true%n%".replace("%n", "\n"),
+        "Hello Ahmad, count=3, done=true" + System.lineSeparator() + "%",
         DominoFormat.format("Hello %s, count=%d, done=%b%n%%", "Ahmad", 3, true));
   }
 
