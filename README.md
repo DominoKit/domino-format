@@ -227,7 +227,7 @@ Supported percent tokens:
 - `%f` decimal values
 - `%b` boolean values
 - `%%` literal percent sign
-- `%n` runtime line separator via `System.lineSeparator()`
+- `%n` portable line feed (`\n`)
 
 Example:
 
