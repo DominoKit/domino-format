@@ -28,6 +28,7 @@ public class JvmFormattingSupport extends GwtFormattingSupport {
    * <p>Fresh formatter instances are created for each call so usage remains thread-safe and
    * independent of caller state.
    */
+  @GwtIncompatible
   public JvmFormattingSupport() {
     this(DEFAULT_NUMBER_FORMATTER, DEFAULT_DATE_FORMATTER);
   }
@@ -38,6 +39,7 @@ public class JvmFormattingSupport extends GwtFormattingSupport {
    * @param numberFormatter the delegate used for numeric patterns, or {@code null}
    * @param dateFormatter the delegate used for date patterns, or {@code null}
    */
+  @GwtIncompatible
   public JvmFormattingSupport(NumberFormatter numberFormatter, DateFormatter dateFormatter) {
     super(numberFormatter, dateFormatter);
   }

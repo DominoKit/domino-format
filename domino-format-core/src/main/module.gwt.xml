@@ -6,4 +6,5 @@
   <inherits name="org.gwtproject.i18n.I18n"/>
 
   <source path=""/>
+  <super-source path="super"/>
 </module>
