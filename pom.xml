@@ -15,8 +15,6 @@
 
   <modules>
     <module>domino-format-core</module>
-    <module>domino-format-jvm</module>
-    <module>domino-format-gwt</module>
   </modules>
 
   <properties>

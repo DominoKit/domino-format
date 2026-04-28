@@ -1,19 +1,18 @@
-package org.dominokit.format.jvm;
+package org.dominokit.format;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Date;
 import java.util.Map;
-import org.dominokit.format.DominoFormat;
-import org.dominokit.format.FormattingSupport;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Verifies JVM-specific numeric and date pattern behavior.
+ * Verifies JVM numeric and date pattern behavior exposed by the shared static facade.
  *
- * <p>The tests ensure the standalone JVM adapter produces the output expected by the initial
- * library specification.
+ * <p>The tests ensure the single core {@link DominoFormat} entry point is initialized with JVM
+ * formatting support by default while still allowing callers to replace the shared support and
+ * missing named argument handler.
  */
 class JvmDominoFormatTest {
 

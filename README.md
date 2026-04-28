@@ -9,40 +9,23 @@ It is built around one parser that can mix four placeholder styles in the same t
 - percent placeholders such as `%d`
 - dollar tokens such as `$D(#,##0.00)`
 
-The library is split into three modules:
+The library publishes one module:
 
 - `domino-format-core`
-  Shared parser, `DominoFormatter`, `FormattingSupport`, and validation rules
-- `domino-format-jvm`
-  JVM runtime adapter that exposes `org.dominokit.format.DominoFormat` with `DecimalFormat` and
-  `SimpleDateFormat` support preinstalled
-- `domino-format-gwt`
-  GWT runtime adapter that exposes the same `org.dominokit.format.DominoFormat` API with
-  `NumberFormat` and `DateTimeFormat` support preinstalled
+  Shared parser, `DominoFormat`, `DominoFormatter`, `FormattingSupport`, GWT formatting support,
+  and JVM formatting support
 
 ## Choose The Right Module
 
 Use `domino-format-core` when:
 
-- you only need the shared parser and instance-based formatting API
 - you are writing runtime-agnostic code
-- you want to provide your own `FormattingSupport`
-
-Use `domino-format-jvm` when:
-
-- your code runs on the JVM
 - you want `DominoFormat.format(...)` to work out of the box for numeric and date patterns
 - you want JVM-native `DecimalFormat` and `SimpleDateFormat` behavior
-
-Use `domino-format-gwt` when:
-
-- your code runs on GWT
-- you want the same `DominoFormat.format(...)` API as the JVM module
-- you want GWT-native `NumberFormat` and `DateTimeFormat` behavior
+- you need GWT-compatible formatting support from the same artifact
+- you want to provide your own `FormattingSupport`
 
 ## Maven Dependencies
-
-### Core Only
 
 ```xml
 <dependency>
@@ -52,34 +35,13 @@ Use `domino-format-gwt` when:
 </dependency>
 ```
 
-### JVM
-
-```xml
-<dependency>
-  <groupId>org.dominokit.format</groupId>
-  <artifactId>domino-format-jvm</artifactId>
-  <version>HEAD-SNAPSHOT</version>
-</dependency>
-```
-
-### GWT
-
-```xml
-<dependency>
-  <groupId>org.dominokit.format</groupId>
-  <artifactId>domino-format-gwt</artifactId>
-  <version>HEAD-SNAPSHOT</version>
-</dependency>
-```
-
 ## Quick Start
 
-### JVM Or GWT Runtime Modules
+### Shared Static API
 
-When you depend on `domino-format-jvm` or `domino-format-gwt`, the selected runtime module
-provides the shared `org.dominokit.format.DominoFormat` facade and installs the correct default
-`FormattingSupport` automatically. No manual bootstrap step is required for patterned numbers or
-dates.
+The core module provides the shared `org.dominokit.format.DominoFormat` facade and installs
+`JvmFormattingSupport` by default. No manual bootstrap step is required for patterned numbers or
+dates on the JVM.
 
 ```java
 import org.dominokit.format.DominoFormat;
@@ -114,10 +76,10 @@ String message =
         3);
 ```
 
-### Core-Only Usage
+### Instance Usage
 
-`domino-format-core` does not publish the static `DominoFormat` facade. It exposes the reusable
-instance API through `DominoFormatter`.
+Use `DominoFormatter` when you need an isolated formatter instance that does not mutate the shared
+static facade.
 
 ```java
 import org.dominokit.format.DominoFormatter;
@@ -127,10 +89,10 @@ DominoFormatter formatter = new DominoFormatter();
 String message = formatter.format("Hello {0}, count=%d, done=%b", "Ahmad", 3, true);
 ```
 
-### Core-Only Usage With Custom Formatting Support
+### Custom Formatting Support
 
-If you depend on `domino-format-core` directly and still want patterned number or date formatting,
-provide a `FormattingSupport` instance explicitly.
+If you want patterned number or date formatting to use custom delegates, provide a
+`FormattingSupport` instance explicitly.
 
 ```java
 import java.text.DecimalFormat;
@@ -152,7 +114,7 @@ String message =
         new Date());
 ```
 
-### Core-Only Usage With A Custom Missing Named Argument Handler
+### Custom Missing Named Argument Handler
 
 If unresolved named placeholders should produce custom fallback text, supply a
 `MissingNamedArgumentHandler`.
@@ -256,8 +218,8 @@ DominoFormat.format("Created: $T(yyyy-MM-dd)", new Date());
 ```
 
 If you use `$N(...)`, `$D(...)`, or `$T(...)`, the active `FormattingSupport` must know how to
-format that pattern. This is automatic in the JVM and GWT runtime modules, and explicit when you
-use `domino-format-core` directly.
+format that pattern. The shared static API installs JVM support by default; isolated formatter
+instances use the support object supplied to their constructor.
 
 ### Mixed Templates
 
@@ -300,7 +262,7 @@ DominoFormat.format(
 There are two ways to use Domino Format:
 
 - `DominoFormat.format(...)`
-  Shared static facade supplied by `domino-format-jvm` and `domino-format-gwt`
+  Shared static facade supplied by `domino-format-core`
 - `new DominoFormatter(...)`
   Explicit formatter instance supplied by `domino-format-core`
 
@@ -314,7 +276,7 @@ Use `DominoFormatter` instances when:
 
 ### Overriding Runtime Defaults
 
-Runtime modules install a default support object automatically, but you can replace it:
+The static facade installs a default support object automatically, but you can replace it:
 
 ```java
 FormattingSupport support =
@@ -327,7 +289,7 @@ DominoFormat.setFormattingSupport(support);
 String message = DominoFormat.format("Price: $D(0.00)", 12.5);
 ```
 
-To restore the runtime-provided support:
+To restore the JVM-backed support:
 
 ```java
 DominoFormat.resetDefaultFormattingSupport();
@@ -359,29 +321,6 @@ DominoFormat.resetDefaultMissingNamedArgumentHandler();
 it. If you want per-instance behavior instead, create a dedicated `DominoFormatter` with the
 desired handler.
 
-## Migrating From The Old Runtime Facades
-
-If you were using the older runtime-specific facade classes, migrate as follows:
-
-- replace `org.dominokit.format.jvm.JvmDominoFormat` with `org.dominokit.format.DominoFormat`
-  from `domino-format-jvm`
-- replace `org.dominokit.format.gwt.GwtDominoFormat` with `org.dominokit.format.DominoFormat`
-  from `domino-format-gwt`
-- remove manual runtime-support installation when you only need the default JVM or GWT
-  behavior, because the runtime modules now install their own default `FormattingSupport`
-
-Before:
-
-```java
-JvmDominoFormat.format("Price: $D(#,##0.00)", 1234.5);
-```
-
-After:
-
-```java
-DominoFormat.format("Price: $D(#,##0.00)", 1234.5);
-```
-
 ## Error Handling
 
 Domino Format fails fast with `FormatException` when it encounters invalid input. Typical cases
@@ -400,7 +339,7 @@ include:
 
 ## Notes
 
-- `domino-format-jvm` and `domino-format-gwt` export the same `org.dominokit.format.DominoFormat`
-  class name. Choose the module that matches your runtime.
-- `domino-format-core` is the shared engine module and is the right choice when you need direct
-  control over formatter instances.
+- `domino-format-core` is the only published module.
+- `DominoFormat` is the shared static facade and starts with `JvmFormattingSupport`.
+- `GwtFormattingSupport` and `JvmFormattingSupport` both extend `FormattingSupport`, so callers can
+  replace the shared default with a runtime-specific or custom support object.

@@ -4,18 +4,17 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * GWT convenience facade for Domino Format.
+ * Shared static facade for Domino Format.
  *
- * <p>This facade provides the shared static entry point used by GWT applications. It is
- * initialized with {@link GwtFormattingSupport} by default, so patterned number and date tokens
- * work without any manual setup.
+ * <p>This facade is published by the core module and is initialized with {@link
+ * JvmFormattingSupport}. The JVM support extends the GWT support path, allowing downstream modules
+ * to depend on one entry point without choosing a runtime-specific Domino Format artifact.
  */
 public final class DominoFormat {
 
-  private static DominoFormatter FORMATTER = new DominoFormatter(GwtFormattingSupport.create());
+  private static DominoFormatter FORMATTER = new DominoFormatter(new JvmFormattingSupport());
 
   private DominoFormat() {}
-
 
   /**
    * Replaces the shared static formatter support used by {@link #format(String, Object...)}.
@@ -32,13 +31,13 @@ public final class DominoFormat {
   }
 
   /**
-   * Restores the shared static formatter to the default GWT formatting support.
+   * Restores the shared static formatter to the default JVM-backed support.
    *
-   * <p>After reset, patterned number and date tokens are again delegated to
-   * {@link GwtFormattingSupport}.
+   * <p>After reset, patterned number and date tokens are delegated through {@link
+   * JvmFormattingSupport}.
    */
   public static void resetDefaultFormattingSupport() {
-    withFormattingSupport(GwtFormattingSupport.create());
+    withFormattingSupport(new JvmFormattingSupport());
   }
 
   /**
@@ -84,8 +83,7 @@ public final class DominoFormat {
   /**
    * Restores the default missing named argument handler.
    *
-   * <p>The default behavior replaces unresolved named placeholder expressions with an empty
-   * string.
+   * <p>The default behavior replaces unresolved named placeholder expressions with an empty string.
    */
   public static void resetDefaultMissingNamedArgumentHandler() {
     withMissingNamedArgumentHandler(MissingNamedArgumentHandler.replaceWithEmpty());

@@ -65,7 +65,7 @@ class DominoFormatTest {
 
   @Test
   void shouldFormatMixedTemplatesWithIndexedPercentAndTokenPlaceholders() {
-    DominoFormat.setDefaultFormattingSupport(
+    DominoFormat.setFormattingSupport(
         FormattingSupport.create(
             (pattern, value) -> "number[" + pattern + "]=" + value,
             (pattern, value) -> "date[" + pattern + "]=" + value.getTime()));
@@ -103,7 +103,7 @@ class DominoFormatTest {
   @Test
   void shouldFormatTokenTemplatesWithInstalledSupport() {
     Date date = new Date(0L);
-    DominoFormat.setDefaultFormattingSupport(
+    DominoFormat.setFormattingSupport(
         FormattingSupport.create(
             (pattern, value) -> "number[" + pattern + "]=" + value,
             (pattern, value) -> "date[" + pattern + "]=" + value.getTime()));
@@ -120,14 +120,14 @@ class DominoFormatTest {
 
   @Test
   void shouldUseCustomMissingNamedArgumentHandler() {
-    DominoFormat.setDefaultMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
+    DominoFormat.setMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
 
     assertEquals("Hello <missing:userName>", DominoFormat.format("Hello $(userName)"));
   }
 
   @Test
   void shouldResetMissingNamedArgumentHandlerToDefaultEmptyBehavior() {
-    DominoFormat.setDefaultMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
+    DominoFormat.setMissingNamedArgumentHandler(expression -> "<missing:" + expression + ">");
     DominoFormat.resetDefaultMissingNamedArgumentHandler();
 
     assertEquals("Hello ", DominoFormat.format("Hello $(userName)"));
@@ -155,6 +155,8 @@ class DominoFormatTest {
 
   @Test
   void shouldFailWhenPatternedNumberSupportIsMissing() {
+    DominoFormat.setFormattingSupport(FormattingSupport.none());
+
     FormatException exception =
         assertThrows(FormatException.class, () -> DominoFormat.format("Qty: $N(000)", 7));
 

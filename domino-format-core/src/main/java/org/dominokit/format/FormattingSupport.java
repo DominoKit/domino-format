@@ -10,14 +10,23 @@ import java.util.Objects;
  * a template includes patterns such as {@code $N(000)} or {@code $T(yyyy-MM-dd)}, the formatter
  * delegates to this object instead of embedding platform-specific logic in the parser.
  */
-public final class FormattingSupport {
+public class FormattingSupport {
 
   private static final FormattingSupport NONE = new FormattingSupport(null, null);
 
   private final NumberFormatter numberFormatter;
   private final DateFormatter dateFormatter;
 
-  private FormattingSupport(NumberFormatter numberFormatter, DateFormatter dateFormatter) {
+  /**
+   * Creates a support object backed by optional number and date delegates.
+   *
+   * <p>Subclasses use this constructor to expose runtime-specific defaults while preserving the
+   * shared null-handling and exception wrapping behavior implemented by this class.
+   *
+   * @param numberFormatter the delegate used for numeric patterns, or {@code null}
+   * @param dateFormatter the delegate used for date patterns, or {@code null}
+   */
+  protected FormattingSupport(NumberFormatter numberFormatter, DateFormatter dateFormatter) {
     this.numberFormatter = numberFormatter;
     this.dateFormatter = dateFormatter;
   }
