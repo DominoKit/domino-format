@@ -18,8 +18,9 @@
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.plugin>3.12.1</maven.compiler.plugin>
     <maven.surefire.plugin>3.2.5</maven.surefire.plugin>
-    <maven.gwt.plugin>1.1.0</maven.gwt.plugin>
-    <gwtproject.version>1.0.0-RC1</gwtproject.version>
+    <maven.gwt.plugin>1.2.0</maven.gwt.plugin>
+    <gwtproject.core.version>1.0.0-RC2</gwtproject.core.version>
+    <gwtproject.version>2.13.0</gwtproject.version>
     <gwt.i18n.version>1.0.2</gwt.i18n.version>
     <junit.jupiter.version>5.10.2</junit.jupiter.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -56,6 +57,12 @@
             <goals>
               <goal>test</goal>
             </goals>
+            <configuration>
+              <excludes>
+                <exclude>**/*GwtTest.java</exclude>
+                <exclude>**/*TestSuite.java</exclude>
+              </excludes>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -66,7 +73,19 @@
     <dependency>
       <groupId>org.gwtproject.core</groupId>
       <artifactId>gwt-core</artifactId>
+      <version>${gwtproject.core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.gwtproject</groupId>
+      <artifactId>gwt-dev</artifactId>
       <version>${gwtproject.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.gwtproject</groupId>
+      <artifactId>gwt-user</artifactId>
+      <version>${gwtproject.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.dominokit.i18n</groupId>
@@ -82,6 +101,18 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
