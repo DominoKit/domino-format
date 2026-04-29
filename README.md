@@ -9,15 +9,15 @@ It is built around one parser that can mix four placeholder styles in the same t
 - percent placeholders such as `%d`
 - dollar tokens such as `$D(#,##0.00)`
 
-The library publishes one module:
+The library publishes one artifact:
 
-- `domino-format-core`
+- `domino-format`
   Shared parser, `DominoFormat`, `DominoFormatter`, `FormattingSupport`, GWT formatting support,
   and JVM formatting support
 
-## Choose The Right Module
+## Choose The Right Artifact
 
-Use `domino-format-core` when:
+Use `domino-format` when:
 
 - you are writing runtime-agnostic code
 - you want `DominoFormat.format(...)` to work out of the box for numeric and date patterns
@@ -30,7 +30,7 @@ Use `domino-format-core` when:
 ```xml
 <dependency>
   <groupId>org.dominokit.format</groupId>
-  <artifactId>domino-format-core</artifactId>
+  <artifactId>domino-format</artifactId>
   <version>HEAD-SNAPSHOT</version>
 </dependency>
 ```
@@ -39,7 +39,7 @@ Use `domino-format-core` when:
 
 ### Shared Static API
 
-The core module provides the shared `org.dominokit.format.DominoFormat` facade and installs
+The library provides the shared `org.dominokit.format.DominoFormat` facade and installs
 `JvmFormattingSupport` by default. No manual bootstrap step is required for patterned numbers or
 dates on the JVM.
 
@@ -262,9 +262,9 @@ DominoFormat.format(
 There are two ways to use Domino Format:
 
 - `DominoFormat.format(...)`
-  Shared static facade supplied by `domino-format-core`
+  Shared static facade supplied by `domino-format`
 - `new DominoFormatter(...)`
-  Explicit formatter instance supplied by `domino-format-core`
+  Explicit formatter instance supplied by `domino-format`
 
 Use the static API when application-wide defaults are appropriate.
 
@@ -301,7 +301,7 @@ formatter and returns it. If you need an isolated formatter that does not change
 
 ### Overriding The Missing Named Argument Handler
 
-Runtime modules also install a default missing named argument handler that replaces unresolved
+The library also installs a default missing named argument handler that replaces unresolved
 `$(...)` placeholders with an empty string. You can replace it:
 
 ```java
@@ -339,7 +339,7 @@ include:
 
 ## Notes
 
-- `domino-format-core` is the only published module.
+- `domino-format` is a single `gwt-lib` module and the only published artifact.
 - `DominoFormat` is the shared static facade and starts with `JvmFormattingSupport`.
 - `GwtFormattingSupport` and `JvmFormattingSupport` both extend `FormattingSupport`, so callers can
   replace the shared default with a runtime-specific or custom support object.

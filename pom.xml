@@ -7,15 +7,11 @@
   <groupId>org.dominokit.format</groupId>
   <artifactId>domino-format</artifactId>
   <version>HEAD-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <packaging>gwt-lib</packaging>
 
-  <name>Domino Format Parent</name>
+  <name>Domino Format</name>
   <description>Standalone multi-style formatting library for DominoKit.</description>
   <url>https://github.com/DominoKit/domino-format</url>
-
-  <modules>
-    <module>domino-format-core</module>
-  </modules>
 
   <properties>
     <maven.compiler.source>11</maven.compiler.source>
@@ -30,48 +26,19 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.gwtproject.core</groupId>
-        <artifactId>gwt-core</artifactId>
-        <version>${gwtproject.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.dominokit.i18n</groupId>
-        <artifactId>gwt-numberformat</artifactId>
-        <version>${gwt.i18n.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.dominokit.i18n</groupId>
-        <artifactId>gwt-datetimeformat</artifactId>
-        <version>${gwt.i18n.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>${junit.jupiter.version}</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>net.ltgt.gwt.maven</groupId>
-          <artifactId>gwt-maven-plugin</artifactId>
-          <version>${maven.gwt.plugin}</version>
-          <extensions>true</extensions>
-          <configuration>
-            <sourceLevel>${maven.compiler.source}</sourceLevel>
-            <failOnError>true</failOnError>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>net.ltgt.gwt.maven</groupId>
+        <artifactId>gwt-maven-plugin</artifactId>
+        <version>${maven.gwt.plugin}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <moduleName>org.dominokit.format.DominoFormat</moduleName>
+          <sourceLevel>${maven.compiler.source}</sourceLevel>
+          <failOnError>true</failOnError>
+        </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.plugin}</version>
@@ -82,7 +49,40 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven.surefire.plugin}</version>
+        <executions>
+          <execution>
+            <id>run-jvm-tests</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.gwtproject.core</groupId>
+      <artifactId>gwt-core</artifactId>
+      <version>${gwtproject.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dominokit.i18n</groupId>
+      <artifactId>gwt-numberformat</artifactId>
+      <version>${gwt.i18n.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dominokit.i18n</groupId>
+      <artifactId>gwt-datetimeformat</artifactId>
+      <version>${gwt.i18n.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>

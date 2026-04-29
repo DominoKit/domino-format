@@ -208,13 +208,12 @@ class ArgumentResolver {
 
 ```text
 domino-format
-└── domino-format-core
-    ├── mixed formatter engine
-    ├── argument resolver
-    ├── shared DominoFormat facade
-    ├── formatting support interfaces
-    ├── java.text adapters
-    └── GWT i18n adapters
+├── mixed formatter engine
+├── argument resolver
+├── shared DominoFormat facade
+├── formatting support interfaces
+├── java.text adapters
+└── GWT i18n adapters
 ```
 
 ---
