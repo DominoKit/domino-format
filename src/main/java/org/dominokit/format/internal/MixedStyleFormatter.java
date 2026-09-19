@@ -1,3 +1,18 @@
+/*
+ * Copyright © 2026 Dominokit
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.dominokit.format.internal;
 
 import java.util.Date;
@@ -9,10 +24,10 @@ import org.dominokit.format.MissingNamedArgumentHandler;
 /**
  * Formats templates that may mix indexed, named, percent, and dollar-token placeholder styles.
  *
- * <p>The formatter scans the template once, resolves indexed placeholders through explicit
- * argument positions, resolves named placeholders through a dedicated expression lookup, and
- * resolves percent and dollar-token placeholders through a shared left-to-right sequential cursor
- * that skips any positional argument slot already claimed by an indexed placeholder.
+ * <p>The formatter scans the template once, resolves indexed placeholders through explicit argument
+ * positions, resolves named placeholders through a dedicated expression lookup, and resolves
+ * percent and dollar-token placeholders through a shared left-to-right sequential cursor that skips
+ * any positional argument slot already claimed by an indexed placeholder.
  */
 public final class MixedStyleFormatter {
 
@@ -78,7 +93,8 @@ public final class MixedStyleFormatter {
       throw new FormatException("Invalid indexed placeholder {" + placeholder + "}", e);
     }
 
-    output.append(String.valueOf(argumentResolver.resolveIndexed(argumentIndex, "{" + placeholder + "}")));
+    output.append(
+        String.valueOf(argumentResolver.resolveIndexed(argumentIndex, "{" + placeholder + "}")));
     return endIndex;
   }
 

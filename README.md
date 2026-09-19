@@ -29,7 +29,7 @@ Use `domino-format` when:
 
 ```xml
 <dependency>
-  <groupId>org.dominokit.format</groupId>
+  <groupId>org.dominokit</groupId>
   <artifactId>domino-format</artifactId>
   <version>HEAD-SNAPSHOT</version>
 </dependency>

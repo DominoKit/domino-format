@@ -1,3 +1,18 @@
+/*
+ * Copyright © 2026 Dominokit
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.dominokit.format;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,9 +56,7 @@ class DominoFormatTest {
     assertEquals(
         "Hello Ahmad, you have 3 items",
         DominoFormat.format(
-            "Hello $(userName), you have %d items",
-            DominoFormat.byName("userName", "Ahmad"),
-            3));
+            "Hello $(userName), you have %d items", DominoFormat.byName("userName", "Ahmad"), 3));
   }
 
   @Test
@@ -51,9 +64,7 @@ class DominoFormatTest {
     assertEquals(
         "Hello Ahmad, you have 3 items",
         DominoFormat.format(
-            "Hello $(userName), you have %d items",
-            Map.of("userName", "Ahmad"),
-            3));
+            "Hello $(userName), you have %d items", Map.of("userName", "Ahmad"), 3));
   }
 
   @Test
@@ -87,10 +98,7 @@ class DominoFormatTest {
     assertEquals(
         "one zero Ahmad",
         DominoFormat.format(
-            "{1} %s $(userName)",
-            DominoFormat.byName("userName", "Ahmad"),
-            "zero",
-            "one"));
+            "{1} %s $(userName)", DominoFormat.byName("userName", "Ahmad"), "zero", "one"));
   }
 
   @Test
@@ -110,7 +118,8 @@ class DominoFormatTest {
 
     assertEquals(
         "Item: Chocolate, qty: number[000]=7, created: date[yyyy-MM-dd]=0",
-        DominoFormat.format("Item: $S, qty: $N(000), created: $T(yyyy-MM-dd)", "Chocolate", 7, date));
+        DominoFormat.format(
+            "Item: $S, qty: $N(000), created: $T(yyyy-MM-dd)", "Chocolate", 7, date));
   }
 
   @Test
@@ -208,7 +217,9 @@ class DominoFormatTest {
   @Test
   void shouldFailWhenNamedArgumentMapContainsBlankKeys() {
     FormatException exception =
-        assertThrows(FormatException.class, () -> DominoFormat.format("Hello $(userName)", Map.of(" ", "Ahmad")));
+        assertThrows(
+            FormatException.class,
+            () -> DominoFormat.format("Hello $(userName)", Map.of(" ", "Ahmad")));
 
     assertEquals("Named argument map keys must not be blank", exception.getMessage());
   }

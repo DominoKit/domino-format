@@ -1,3 +1,18 @@
+/*
+ * Copyright © 2026 Dominokit
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.dominokit.format;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,10 +45,7 @@ class JvmDominoFormatTest {
         "User Ahmad bought 003 items for 1,250.75 on 2026-04-24",
         DominoFormat.format(
             "User {0} bought $N(000) items for $D(#,##0.00) on $T(yyyy-MM-dd)",
-            "Ahmad",
-            3,
-            1250.75,
-            date));
+            "Ahmad", 3, 1250.75, date));
   }
 
   @Test
@@ -54,8 +66,7 @@ class JvmDominoFormatTest {
   @Test
   void shouldFormatNamedArgumentsThroughTheSharedStaticApi() {
     assertEquals(
-        "Hello Ahmad",
-        DominoFormat.format("Hello $(userName)", Map.of("userName", "Ahmad")));
+        "Hello Ahmad", DominoFormat.format("Hello $(userName)", Map.of("userName", "Ahmad")));
   }
 
   @Test
