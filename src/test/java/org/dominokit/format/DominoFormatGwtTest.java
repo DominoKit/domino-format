@@ -1,3 +1,18 @@
+/*
+ * Copyright © 2026 Dominokit
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.dominokit.format;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -45,18 +60,14 @@ public class DominoFormatGwtTest extends GWTTestCase {
     assertEquals(
         "Hello Ahmad, you have 3 items",
         DominoFormat.format(
-            "Hello $(userName), you have %d items",
-            DominoFormat.byName("userName", "Ahmad"),
-            3));
+            "Hello $(userName), you have %d items", DominoFormat.byName("userName", "Ahmad"), 3));
   }
 
   public void testShouldFormatNamedTemplatesUsingNamedArgumentMaps() {
     assertEquals(
         "Hello Ahmad, you have 3 items",
         DominoFormat.format(
-            "Hello $(userName), you have %d items",
-            namedArguments("userName", "Ahmad"),
-            3));
+            "Hello $(userName), you have %d items", namedArguments("userName", "Ahmad"), 3));
   }
 
   public void testShouldTrimNamedPlaceholderExpressionsAndNamedArgumentNames() {
@@ -86,10 +97,7 @@ public class DominoFormatGwtTest extends GWTTestCase {
     assertEquals(
         "one zero Ahmad",
         DominoFormat.format(
-            "{1} %s $(userName)",
-            DominoFormat.byName("userName", "Ahmad"),
-            "zero",
-            "one"));
+            "{1} %s $(userName)", DominoFormat.byName("userName", "Ahmad"), "zero", "one"));
   }
 
   public void testShouldExcludeNamedArgumentMapsFromPositionalResolution() {
@@ -150,8 +158,7 @@ public class DominoFormatGwtTest extends GWTTestCase {
   public void testShouldFailWhenPatternedNumberSupportIsMissing() {
     DominoFormat.setFormattingSupport(FormattingSupport.none());
 
-    FormatException exception =
-        assertFormatException(() -> DominoFormat.format("Qty: $N(000)", 7));
+    FormatException exception = assertFormatException(() -> DominoFormat.format("Qty: $N(000)", 7));
 
     assertEquals("No number formatter configured for pattern '000'", exception.getMessage());
   }
@@ -179,8 +186,7 @@ public class DominoFormatGwtTest extends GWTTestCase {
   }
 
   public void testShouldFailOnUnsupportedPercentToken() {
-    FormatException exception =
-        assertFormatException(() -> DominoFormat.format("Value=%x", 10));
+    FormatException exception = assertFormatException(() -> DominoFormat.format("Value=%x", 10));
 
     assertEquals("Unsupported percent token %x", exception.getMessage());
   }
@@ -214,10 +220,7 @@ public class DominoFormatGwtTest extends GWTTestCase {
         "User Ahmad bought 003 items for 1,250.75 on 2026-04-24",
         DominoFormat.format(
             "User {0} bought $N(000) items for $D(#,##0.00) on $T(yyyy-MM-dd)",
-            "Ahmad",
-            3,
-            1250.75,
-            date));
+            "Ahmad", 3, 1250.75, date));
   }
 
   public void testShouldExposePatternSupportThroughTheSharedStaticApiByDefault() {
@@ -307,14 +310,10 @@ public class DominoFormatGwtTest extends GWTTestCase {
     return null;
   }
 
-  /**
-   * Functional command used by exception assertion helpers.
-   */
+  /** Functional command used by exception assertion helpers. */
   private interface ThrowingCommand {
 
-    /**
-     * Executes code that is expected to throw.
-     */
+    /** Executes code that is expected to throw. */
     void execute();
   }
 }
